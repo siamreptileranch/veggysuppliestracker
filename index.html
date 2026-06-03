@@ -1,0 +1,921 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SRR Order Sheet</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --fb-blue:#1877f2;--fb-blue-dk:#166fe5;--fb-blue-lt:#e7f3ff;
+  --bg:#f0f2f5;--surface:#fff;--border:#dde1e7;
+  --text:#050505;--muted:#65676b;--hover:#f2f2f2;
+  --green:#42b72a;--green-lt:#e6f4ea;--green-dk:#1a5c0c;
+  --red:#fa3e3e;--red-lt:#fdeaea;
+  --amber:#f7b928;--amber-lt:#fff3cd;
+  --font:'Inter',sans-serif;--r:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:var(--font);font-size:14px;min-height:100vh}
+
+/* NAV */
+.nav{background:var(--fb-blue);height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 16px;position:sticky;top:0;z-index:300;box-shadow:0 2px 6px rgba(24,119,242,.3);gap:10px}
+.nav-logo{display:flex;align-items:center;gap:9px;color:#fff;white-space:nowrap}
+.nav-ico{width:34px;height:34px;border-radius:50%;background:rgba(255,255,255,.2);display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.nav-name{font-size:15px;font-weight:700;line-height:1.2}
+.nav-sub{font-size:10px;color:rgba(255,255,255,.75);font-weight:400}
+.nav-right{display:flex;align-items:center;gap:7px;flex-shrink:0}
+
+.nav-clock{font-size:11px;color:rgba(255,255,255,.8);white-space:nowrap}
+.sync-pill{font-size:11px;font-weight:700;padding:4px 10px;border-radius:20px;background:rgba(255,255,255,.15);color:#fff;border:1px solid rgba(255,255,255,.3);cursor:pointer;white-space:nowrap}
+
+/* TABS */
+.tabs{background:var(--surface);border-bottom:1px solid var(--border);padding:0 16px;display:flex;gap:2px}
+.fb-tab{padding:10px 16px;border:none;background:transparent;font-size:13px;font-weight:600;cursor:pointer;color:var(--muted);font-family:var(--font);border-bottom:3px solid transparent;transition:all .1s;white-space:nowrap}
+.fb-tab:hover{color:var(--fb-blue);background:var(--fb-blue-lt)}
+.fb-tab.active{color:var(--fb-blue);border-bottom-color:var(--fb-blue)}
+
+/* MAIN */
+.main{max-width:960px;margin:0 auto;padding:14px 12px}
+
+/* SCHEDULE BANNER */
+.sched-banner{border-radius:var(--r);padding:10px 14px;margin-bottom:12px;display:flex;align-items:center;gap:10px;flex-wrap:wrap;font-size:13px;font-weight:600;border:2px solid var(--border);background:var(--surface)}
+.sched-banner.active{border-color:var(--fb-blue);background:var(--fb-blue-lt)}
+.sched-banner.warn{border-color:var(--amber);background:var(--amber-lt)}
+.sched-banner.late{border-color:var(--red);background:var(--red-lt)}
+.sched-banner.ok{border-color:var(--green);background:var(--green-lt)}
+.sb-chips{display:flex;gap:5px;flex-wrap:wrap;margin-left:auto}
+.sbc{font-size:10px;font-weight:700;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.sbc.done{background:var(--green-lt);color:var(--green-dk);border:1px solid var(--green)}
+.sbc.now{background:var(--fb-blue);color:#fff}
+.sbc.next{background:var(--hover);color:var(--muted);border:1px solid var(--border)}
+
+/* SIDE BY SIDE GRID */
+.side-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:12px}
+
+/* FORM CARD */
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.fc-head{padding:10px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border)}
+.fc-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.fc-title{font-size:14px;font-weight:700}
+.fc-sub{font-size:10px;color:var(--muted);margin-top:1px}
+.fc-badge{margin-left:auto;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;white-space:nowrap}
+.fc-badge.done{background:var(--green-lt);color:var(--green-dk)}
+.fc-badge.pending{background:var(--amber-lt);color:#856404}
+.fc-body{padding:10px 12px;display:flex;flex-direction:column;gap:7px}
+
+/* FIELDS */
+.field{display:flex;flex-direction:column;gap:3px}
+.flbl{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.04em;text-transform:uppercase;line-height:1.3}
+.flbl-my{font-size:9px;color:#9ca3af;font-weight:400;text-transform:none;letter-spacing:0}
+.finput{background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:7px 10px;font-size:14px;font-weight:700;font-family:var(--font);color:var(--text);outline:none;transition:border-color .15s;width:100%;text-align:center}
+.finput:focus{border-color:var(--fb-blue);background:#fff}
+.finput.text{text-align:left;font-size:13px;font-weight:500}
+.finput[readonly]{opacity:.6;cursor:default;background:var(--hover)}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:6px}
+.sect-divider{font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.07em;text-transform:uppercase;padding:5px 0 3px;border-top:1px solid var(--border);margin-top:2px;display:flex;align-items:center;gap:5px}
+
+/* SUBMIT BTN */
+.sub-btn{width:100%;padding:10px;border-radius:var(--r);border:none;font-size:13px;font-weight:700;font-family:var(--font);cursor:pointer;transition:all .15s;margin-top:4px;display:flex;align-items:center;justify-content:center;gap:6px}
+.sub-btn.srr2{background:var(--fb-blue);color:#fff}
+.sub-btn.srr2:hover{background:var(--fb-blue-dk)}
+.sub-btn.srr1{background:var(--green);color:#fff}
+.sub-btn.srr1:hover{background:#36a420}
+.sub-btn:disabled{opacity:.4;cursor:not-allowed}
+
+/* WASH ROW — full width below the two columns */
+.wash-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 16px;margin-bottom:12px;box-shadow:0 1px 3px rgba(0,0,0,.08);display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+.wash-label{flex:1;min-width:200px}
+.wash-title{font-size:13px;font-weight:700;display:flex;align-items:center;gap:6px}
+.wash-my{font-size:11px;color:var(--muted);margin-top:2px}
+.wash-inputs{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.wash-inp-wrap{display:flex;flex-direction:column;align-items:center;gap:3px}
+.wash-inp-lbl{font-size:10px;font-weight:700;color:var(--muted)}
+.wash-inp{background:var(--bg);border:1.5px solid var(--border);border-radius:6px;padding:7px 10px;font-size:15px;font-weight:700;font-family:var(--font);color:var(--text);outline:none;width:80px;text-align:center}
+.wash-inp:focus{border-color:var(--fb-blue);background:#fff}
+.wash-total{display:flex;flex-direction:column;align-items:center;gap:3px}
+.wash-total-val{font-size:22px;font-weight:800;color:var(--fb-blue)}
+.wash-total-lbl{font-size:9px;color:var(--muted);font-weight:700;text-transform:uppercase}
+
+/* COMBINED TABLE */
+.combined-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)}
+.combined-head{padding:10px 14px;background:var(--fb-blue-lt);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px}
+.combined-title{font-size:14px;font-weight:700;color:var(--fb-blue)}
+table.ctbl{width:100%;border-collapse:collapse;font-size:13px}
+.ctbl th{padding:8px 12px;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em;text-transform:uppercase;border-bottom:2px solid var(--border);text-align:left}
+.ctbl td{padding:9px 12px;border-bottom:1px solid var(--border)}
+.ctbl tr:last-child td{border-bottom:none}
+.ctbl tr:hover td{background:var(--hover)}
+.v-srr1{color:var(--green-dk);font-weight:700}
+.v-srr2{color:var(--fb-blue);font-weight:700}
+.v-total{color:#92400e;font-weight:800;font-size:14px}
+.v-na{color:var(--border);font-weight:400}
+.item-lbl{font-weight:600}
+.item-my{font-size:10px;color:var(--muted);margin-top:1px}
+
+/* HISTORY */
+.hist-entry{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px;margin-bottom:8px}
+.he-top{display:flex;align-items:center;gap:7px;margin-bottom:6px;flex-wrap:wrap}
+.he-badge{font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px}
+.he-badge.srr1{background:var(--green-lt);color:var(--green-dk)}
+.he-badge.srr2{background:var(--fb-blue-lt);color:var(--fb-blue)}
+.he-ts{font-size:11px;color:var(--muted)}
+.he-chips{display:flex;flex-wrap:wrap;gap:5px}
+.he-chip{font-size:11px;background:var(--bg);border:1px solid var(--border);padding:2px 8px;border-radius:6px}
+
+/* PHOTOS */
+.photo-add-btn{display:flex;align-items:center;justify-content:center;gap:7px;width:100%;padding:10px;border:2px dashed var(--border);border-radius:var(--r);font-size:12px;font-weight:600;color:var(--fb-blue);cursor:pointer;transition:all .15s;background:var(--fb-blue-lt);text-align:center}
+.photo-add-btn:hover{border-color:var(--fb-blue);background:#dbeafe}
+.photo-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(72px,1fr));gap:6px;margin-top:6px}
+.photo-thumb{position:relative;aspect-ratio:1;border-radius:6px;overflow:hidden;border:1px solid var(--border)}
+.photo-thumb img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-del{position:absolute;top:3px;right:3px;width:18px;height:18px;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font-size:10px;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;line-height:1;font-family:var(--font)}
+.photo-del:hover{background:var(--red)}
+.photo-count{font-size:10px;color:var(--muted);margin-top:3px;text-align:right}
+
+.toast{position:fixed;bottom:20px;left:50%;transform:translateX(-50%) translateY(10px);padding:10px 18px;border-radius:var(--r);font-size:13px;font-weight:500;opacity:0;transition:all .25s;z-index:999;pointer-events:none;white-space:nowrap}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.toast.ok{background:var(--green);color:#fff}
+.toast.err{background:var(--red);color:#fff}
+.toast.info{background:var(--text);color:#fff}
+
+@media(max-width:640px){
+  .side-grid{grid-template-columns:1fr}
+  .wash-inputs{gap:6px}
+  .wash-inp{width:70px}
+}
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">
+    <div class="nav-ico">🦎</div>
+    <div>
+      <div class="nav-name">SRR Order Sheet</div>
+      <div class="nav-sub">SUNDAY & WEDNESDAY · BEFORE 8:00 AM</div>
+    </div>
+  </div>
+  <div class="nav-right">
+    <span class="sync-pill" id="sync-pill" onclick="syncNow()">⬤ …</span>
+    <span class="nav-clock" id="clock"></span>
+  </div>
+</nav>
+
+<div class="tabs">
+  <button type="button" class="fb-tab active" id="tab-form"     onclick="showTab('form')">📋 Order Form</button>
+  <button type="button" class="fb-tab"        id="tab-combined" onclick="showTab('combined')">📊 Combined Total</button>
+  <button type="button" class="fb-tab"        id="tab-history"  onclick="showTab('history')">🕐 History</button>
+</div>
+
+<div class="main">
+
+  <!-- SCHEDULE BANNER -->
+  <div id="sched-banner" class="sched-banner active">
+    <span id="sb-icon" style="font-size:20px;flex-shrink:0">📋</span>
+    <div style="flex:1">
+      <div id="sb-msg" style="font-size:13px;font-weight:700">Loading…</div>
+      <div id="sb-sub" style="font-size:11px;color:var(--muted);margin-top:1px"></div>
+    </div>
+    <div class="sb-chips">
+      <span class="sbc next" id="sbc-sun">☀️ Sunday</span>
+      <span class="sbc next" id="sbc-wed">🌿 Wednesday</span>
+    </div>
+  </div>
+
+  <!-- ORDER FORM PAGE -->
+  <div id="page-form">
+
+    <!-- SIDE BY SIDE: SRR2 left, SRR1 right -->
+    <div class="side-grid">
+
+      <!-- SRR1 (was right, now left) -->
+      <div class="form-card">
+        <div class="fc-head" style="background:var(--green-lt)">
+          <div class="fc-dot" style="background:var(--green)"></div>
+          <div>
+            <div class="fc-title" style="color:var(--green-dk)">🏠 SRR1 — Old Location</div>
+            <div class="fc-sub">တည်နေရာဟောင်း</div>
+          </div>
+          <div class="fc-badge pending" id="srr1-badge">⬜ Pending</div>
+        </div>
+        <div class="fc-body">
+          <div class="field">
+            <div class="flbl">Employee · ဝန်ထမ်း</div>
+            <input class="finput text" id="srr1-emp" placeholder="Your name…">
+          </div>
+
+          <div class="sect-divider">🥬 Vegetables</div>
+          <div class="field-row">
+            <div class="field">
+              <div class="flbl">Remaining bags<div class="flbl-my">ကျန်သောအိတ်</div></div>
+              <input class="finput" type="number" min="0" id="srr1-veg-remain" oninput="renderTotals()" placeholder="0">
+            </div>
+            <div class="field">
+              <div class="flbl">Order bags<div class="flbl-my">မှာရမည်</div></div>
+              <input class="finput" type="number" min="0" id="srr1-veg-order" placeholder="0" oninput="updateWashTotal()">
+            </div>
+          </div>
+
+          <div class="sect-divider">🥕 Carrots</div>
+          <div class="field-row">
+            <div class="field">
+              <div class="flbl">Remaining boxes<div class="flbl-my">ကျန်သောပုံး</div></div>
+              <input class="finput" type="number" min="0" id="srr1-carrot-remain" oninput="renderTotals()" placeholder="0">
+            </div>
+            <div class="field">
+              <div class="flbl">Buy boxes<div class="flbl-my">ဝယ်ရမည်</div></div>
+              <input class="finput" type="number" min="0" id="srr1-carrot-buy" oninput="renderTotals()" placeholder="0">
+            </div>
+          </div>
+
+          <div class="sect-divider">🎃 Pumpkin</div>
+          <div class="field">
+            <div class="flbl">Buy how many<div class="flbl-my">ရွှေဖရုံသီး ဝယ်ရမည်</div></div>
+            <input class="finput" type="number" min="0" id="srr1-pumpkin" oninput="renderTotals()" placeholder="0">
+          </div>
+
+          <div class="sect-divider">🥚 Protein & Extras</div>
+          <div class="field">
+              <div class="flbl">Eggs (pcs)<div class="flbl-my">ကြက်ဥ</div></div>
+              <input class="finput" type="number" min="0" id="srr1-eggs" oninput="renderTotals()" placeholder="0">
+          </div>
+          <div class="field-row">
+            <div class="field">
+              <div class="flbl">Chicken meat (kg)<div class="flbl-my">ကြက်သား</div></div>
+              <input class="finput" type="number" min="0" step="0.1" id="srr1-chicken" oninput="renderTotals()" placeholder="0">
+            </div>
+            <div class="field">
+              <div class="flbl">Gizzards (kg)<div class="flbl-my">ကြက်အူ</div></div>
+              <input class="finput" type="number" min="0" step="0.1" id="srr1-gizzard" oninput="renderTotals()" placeholder="0">
+            </div>
+          </div>
+          <div class="field">
+            <div class="flbl">Fish (kg)<div class="flbl-my">ငါး</div></div>
+            <input class="finput" type="number" min="0" step="0.1" id="srr1-fish" oninput="renderTotals()" placeholder="0">
+          </div>
+
+          <div class="sect-divider">📷 Photos · ဓာတ်ပုံများ</div>
+          <div class="field">
+            <div class="flbl">Add photos of items to buy<div class="flbl-my">ဝယ်ရမည့်ပစ္စည်းများ ဓာတ်ပုံ</div></div>
+            <label class="photo-add-btn" for="srr1-photos">
+              📷 Tap to add photos · ဓာတ်ပုံထည့်ရန်
+              <input type="file" id="srr1-photos" accept="image/*" multiple capture="environment" style="display:none" onchange="handlePhotos('srr1',this)">
+            </label>
+            <div class="photo-grid" id="srr1-photo-grid"></div>
+            <div class="photo-count" id="srr1-photo-count"></div>
+          </div>
+
+          <button type="button" class="sub-btn srr1" id="srr1-submit" onclick="submitOrder('srr1')">☁️ Submit SRR1</button>
+        </div>
+      </div>
+
+      <!-- SRR2 (was left, now right) -->
+      <div class="form-card">
+        <div class="fc-head" style="background:var(--fb-blue-lt)">
+          <div class="fc-dot" style="background:var(--fb-blue)"></div>
+          <div>
+            <div class="fc-title" style="color:var(--fb-blue)">🏢 SRR2 — New Location</div>
+            <div class="fc-sub">တည်နေရာသစ်</div>
+          </div>
+          <div class="fc-badge pending" id="srr2-badge">⬜ Pending</div>
+        </div>
+        <div class="fc-body">
+          <div class="field">
+            <div class="flbl">Employee · ဝန်ထမ်း</div>
+            <input class="finput text" id="srr2-emp" placeholder="Your name…">
+          </div>
+
+          <div class="sect-divider">🥬 Vegetables</div>
+          <div class="field-row">
+            <div class="field">
+              <div class="flbl">Remaining bags<div class="flbl-my">ကျန်သောအိတ်</div></div>
+              <input class="finput" type="number" min="0" id="srr2-veg-remain" oninput="renderTotals()" placeholder="0">
+            </div>
+            <div class="field">
+              <div class="flbl">Order bags<div class="flbl-my">မှာရမည်</div></div>
+              <input class="finput" type="number" min="0" id="srr2-veg-order" placeholder="0" oninput="updateWashTotal()">
+            </div>
+          </div>
+
+          <div class="sect-divider">🥕 Carrots</div>
+          <div class="field-row">
+            <div class="field">
+              <div class="flbl">Remaining boxes<div class="flbl-my">ကျန်သောပုံး</div></div>
+              <input class="finput" type="number" min="0" id="srr2-carrot-remain" oninput="renderTotals()" placeholder="0">
+            </div>
+            <div class="field">
+              <div class="flbl">Buy boxes<div class="flbl-my">ဝယ်ရမည်</div></div>
+              <input class="finput" type="number" min="0" id="srr2-carrot-buy" oninput="renderTotals()" placeholder="0">
+            </div>
+          </div>
+
+          <div class="sect-divider">🎃 Pumpkin</div>
+          <div class="field">
+            <div class="flbl">Bring how many<div class="flbl-my">ရွှေဖရုံသီး ယူလာပါ</div></div>
+            <input class="finput" type="number" min="0" id="srr2-pumpkin" oninput="renderTotals()" placeholder="0">
+          </div>
+
+          <div class="sect-divider">📷 Photos · ဓာတ်ပုံများ</div>
+          <div class="field">
+            <div class="flbl">Add photos of items to buy<div class="flbl-my">ဝယ်ရမည့်ပစ္စည်းများ ဓာတ်ပုံ</div></div>
+            <label class="photo-add-btn" for="srr2-photos">
+              📷 Tap to add photos · ဓာတ်ပုံထည့်ရန်
+              <input type="file" id="srr2-photos" accept="image/*" multiple capture="environment" style="display:none" onchange="handlePhotos('srr2',this)">
+            </label>
+            <div class="photo-grid" id="srr2-photo-grid"></div>
+            <div class="photo-count" id="srr2-photo-count"></div>
+          </div>
+
+          <button type="button" class="sub-btn srr2" id="srr2-submit" onclick="submitOrder('srr2')">☁️ Submit SRR2</button>
+        </div>
+      </div>
+
+    </div><!-- /side-grid -->
+
+    <!-- WASH ROW — single line spanning full width -->
+    <div class="wash-card">
+      <div class="wash-label">
+        <div class="wash-title">🚿 Vegetable Bags to Wash for Tomorrow</div>
+        <div class="wash-my">မနက်ဖြန်အတွက် ဟင်းသီးဟင်းရွက်အိတ် ဘယ်လောက်လျှော်ရမလဲ</div>
+        <div style="font-size:11px;color:var(--muted);margin-top:4px">Auto-calculated from veg bags ordered · မှာယူသောအိတ်အရေအတွက်မှ တွက်ချက်</div>
+      </div>
+      <div class="wash-inputs">
+        <div class="wash-inp-wrap">
+          <div class="wash-inp-lbl" style="color:var(--green-dk)">SRR1 orders</div>
+          <div class="wash-inp" id="srr1-wash-display" style="display:flex;align-items:center;justify-content:center;background:var(--green-lt);border-color:var(--green);color:var(--green-dk);font-weight:800">0</div>
+        </div>
+        <div style="font-size:20px;color:var(--border);padding-top:14px">+</div>
+        <div class="wash-inp-wrap">
+          <div class="wash-inp-lbl" style="color:var(--fb-blue)">SRR2 orders</div>
+          <div class="wash-inp" id="srr2-wash-display" style="display:flex;align-items:center;justify-content:center;background:var(--fb-blue-lt);border-color:var(--fb-blue);color:var(--fb-blue);font-weight:800">0</div>
+        </div>
+        <div style="font-size:20px;color:var(--border);padding-top:14px">=</div>
+        <div class="wash-total">
+          <div class="wash-total-val" id="wash-total">0</div>
+          <div class="wash-total-lbl">Total to wash</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- TOTALS SUMMARY CARD -->
+    <div id="totals-card" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.08)">
+      <div style="background:var(--fb-blue);padding:10px 16px;display:flex;align-items:center;gap:8px">
+        <span style="font-size:16px">🛒</span>
+        <div style="font-weight:700;color:#fff;font-size:14px">Total Items to Buy · ဝယ်ရမည့်ပစ္စည်းများ စုစုပေါင်း</div>
+        <div style="margin-left:auto;font-size:11px;color:rgba(255,255,255,.75)" id="totals-date"></div>
+      </div>
+      <div style="overflow-x:auto">
+        <table style="width:100%;border-collapse:collapse;font-size:13px">
+          <thead>
+            <tr style="background:#f8f9fa">
+              <th style="padding:8px 14px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.05em;border-bottom:2px solid var(--border)">ITEM</th>
+              <th style="padding:8px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--green-dk);letter-spacing:.05em;border-bottom:2px solid var(--border)">🏠 SRR1</th>
+              <th style="padding:8px 14px;text-align:center;font-size:10px;font-weight:700;color:var(--fb-blue);letter-spacing:.05em;border-bottom:2px solid var(--border)">🏢 SRR2</th>
+              <th style="padding:8px 14px;text-align:center;font-size:10px;font-weight:700;color:#92400e;letter-spacing:.05em;border-bottom:2px solid var(--border)">TOTAL</th>
+            </tr>
+          </thead>
+          <tbody id="totals-tbody"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div><!-- /page-form -->
+
+  <!-- COMBINED PAGE -->
+  <div id="page-combined" style="display:none">
+    <div class="combined-card">
+      <div class="combined-head">
+        <span style="font-size:18px">📊</span>
+        <div class="combined-title">Combined Order Total · စုစုပေါင်း</div>
+        <div style="margin-left:auto;font-size:11px;color:var(--muted)" id="combined-date"></div>
+      </div>
+      <table class="ctbl">
+        <thead><tr>
+          <th>Item</th>
+          <th style="color:var(--green-dk)">🏠 SRR1</th>
+          <th style="color:var(--fb-blue)">🏢 SRR2</th>
+          <th style="color:#92400e">TOTAL</th>
+        </tr></thead>
+        <tbody id="combined-tbody"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- HISTORY PAGE -->
+  <div id="page-history" style="display:none">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px;flex-wrap:wrap;gap:8px">
+      <div style="font-size:15px;font-weight:700">🕐 Daily Order History · နေ့စဉ်မှတ်တမ်း</div>
+      <button type="button" onclick="renderHistory()" style="font-size:11px;padding:5px 12px;border-radius:20px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-family:var(--font);color:var(--fb-blue);font-weight:600">↻ Refresh</button>
+    </div>
+    <div id="history-list"></div>
+  </div>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG ─────────────────────────────────────────────────────
+var SHEET_URL  = 'https://script.google.com/macros/s/AKfycbza3vt6_5yDby0CFAVC7ltw5PvChkWPbjLGVDcYHqKnbJ9LM33gfNXRWrEEhSkK0kjD/exec';
+
+// ── DATA ───────────────────────────────────────────────────────
+function loadLocal(){ try{var d=localStorage.getItem('srr_orders2');return d?JSON.parse(d):{submissions:[]};}catch(e){return{submissions:[]};} }
+function saveLocal(){ localStorage.setItem('srr_orders2',JSON.stringify(DATA)); }
+var DATA = loadLocal();
+
+// ── HELPERS ────────────────────────────────────────────────────
+function pad(n){return String(n).padStart(2,'0');}
+function nowStr(){var d=new Date();return d.toISOString().slice(0,10)+' '+pad(d.getHours())+':'+pad(d.getMinutes());}
+function todayStr(){return new Date().toISOString().slice(0,10);}
+var DAY_NAMES=['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+
+function isOrderDay(){return [0,3].indexOf(new Date().getDay())>-1;}
+function isBeforeDeadline(){return new Date().getHours()<8;}
+function isOpen(){return isOrderDay()&&isBeforeDeadline();}
+
+function nextOrderDay(){
+  var d=new Date(),day=d.getDay();
+  var dists=[0,3].map(function(od){var diff=(od-day+7)%7;return diff===0?7:diff;});
+  var next=new Date(d);next.setDate(d.getDate()+Math.min.apply(null,dists));
+  return next;
+}
+
+function alreadySubmitted(loc){
+  return DATA.submissions.some(function(s){return s.date===todayStr()&&s.loc===loc;});
+}
+
+// ── CLOCK ──────────────────────────────────────────────────────
+function tick(){
+  var d=new Date();
+  document.getElementById('clock').textContent=pad(d.getHours())+':'+pad(d.getMinutes())+':'+pad(d.getSeconds());
+  updateBanner();
+}
+setInterval(tick,1000); tick();
+
+function updateBanner(){
+  var d=new Date(),dow=d.getDay(),h=d.getHours(),m=d.getMinutes();
+  var minsLeft=(8*60)-(h*60+m);
+  var banner=document.getElementById('sched-banner');
+  var icon=document.getElementById('sb-icon');
+  var msg=document.getElementById('sb-msg');
+  var sub=document.getElementById('sb-sub');
+  var sunEl=document.getElementById('sbc-sun');
+  var wedEl=document.getElementById('sbc-wed');
+  if(!banner) return;
+
+  sunEl.className='sbc '+(dow>0?'done':dow===0&&h>=8?'done':'now');
+  wedEl.className='sbc '+(dow>3?'done':dow===3&&h>=8?'done':dow===3?'now':'next');
+
+  if(!isOrderDay()){
+    banner.className='sched-banner ok';
+    icon.textContent='✅';
+    var next=nextOrderDay();
+    msg.textContent='Next order day: '+DAY_NAMES[next.getDay()]+' '+next.getDate()+'/'+(next.getMonth()+1);
+    sub.textContent='Orders must be submitted before 8:00 AM · မနက် ၈ နာရီမတိုင်မီ';
+  } else if(isBeforeDeadline()){
+    banner.className='sched-banner '+(minsLeft<=60?'warn':'active');
+    icon.textContent=minsLeft<=60?'⚠️':'📋';
+    msg.textContent=minsLeft<=60?'HURRY! '+minsLeft+' minutes left to submit!':'Order day — submit both SRR1 & SRR2 before 8:00 AM';
+    sub.textContent='မနက် ၈ နာရီမတိုင်မီ SRR1 နှင့် SRR2 နှစ်ခုစလုံး တင်သွင်းပါ · '+minsLeft+' min remaining';
+  } else {
+    banner.className='sched-banner late';
+    icon.textContent='🔒';
+    msg.textContent='Deadline passed — next '+DAY_NAMES[nextOrderDay().getDay()];
+    sub.textContent='မနက် ၈ နာရီကျော်ပြီ — နောက်တစ်ကြိမ် '+DAY_NAMES[nextOrderDay().getDay()]+' နေ့တွင်';
+  }
+}
+
+// ── WASH TOTAL ──────────────────────────────────────────────────
+function updateWashTotal(){
+  var s1=parseInt(document.getElementById('srr1-veg-order').value)||0;
+  var s2=parseInt(document.getElementById('srr2-veg-order').value)||0;
+  var d1=document.getElementById('srr1-wash-display');
+  var d2=document.getElementById('srr2-wash-display');
+  if(d1) d1.textContent=s1;
+  if(d2) d2.textContent=s2;
+  document.getElementById('wash-total').textContent=s1+s2;
+  renderTotals();
+}
+
+function getFormVal(id){ return parseFloat(document.getElementById(id)&&document.getElementById(id).value||0)||0; }
+
+function renderTotals(){
+  var today=todayStr();
+  var s1sub=DATA.submissions.find(function(s){return s.date===today&&s.loc==='srr1';});
+  var s2sub=DATA.submissions.find(function(s){return s.date===today&&s.loc==='srr2';});
+  // Live form values override submitted values
+  var s1={
+    veg_order:   s1sub?s1sub.veg_order:getFormVal('srr1-veg-order'),
+    veg_remain:  s1sub?s1sub.veg_remain:getFormVal('srr1-veg-remain'),
+    carrot_buy:  s1sub?s1sub.carrot_buy:getFormVal('srr1-carrot-buy'),
+    carrot_remain:s1sub?s1sub.carrot_remain:getFormVal('srr1-carrot-remain'),
+    pumpkin:     s1sub?s1sub.pumpkin:getFormVal('srr1-pumpkin'),
+    eggs:        s1sub?s1sub.eggs:getFormVal('srr1-eggs'),
+    chicken:     s1sub?s1sub.chicken:getFormVal('srr1-chicken'),
+    gizzard:     s1sub?s1sub.gizzard:getFormVal('srr1-gizzard'),
+    fish:        s1sub?s1sub.fish:getFormVal('srr1-fish'),
+  };
+  var s2={
+    veg_order:   s2sub?s2sub.veg_order:getFormVal('srr2-veg-order'),
+    veg_remain:  s2sub?s2sub.veg_remain:getFormVal('srr2-veg-remain'),
+    carrot_buy:  s2sub?s2sub.carrot_buy:getFormVal('srr2-carrot-buy'),
+    carrot_remain:s2sub?s2sub.carrot_remain:getFormVal('srr2-carrot-remain'),
+    pumpkin:     s2sub?s2sub.pumpkin:getFormVal('srr2-pumpkin'),
+  };
+
+  var d=document.getElementById('totals-date');
+  if(d) d.textContent=today+(s1sub||s2sub?' · '+(s1sub?'SRR1 ✅':'SRR1 ❌')+' '+(s2sub?'SRR2 ✅':'SRR2 ❌'):'');
+
+  var rows=[
+    {label:'🥬 Vegetables to buy',     my:'ဟင်းသီးဟင်းရွက် မှာရန်',  k1:'veg_order',   k2:'veg_order'},
+    {label:'🥕 Carrot boxes to buy',   my:'မုန်လာဥနီ ဝယ်ရန်',         k1:'carrot_buy',  k2:'carrot_buy'},
+    {label:'🎃 Pumpkins',              my:'ရွှေဖရုံသီး',                k1:'pumpkin',     k2:'pumpkin'},
+    {label:'🥚 Eggs',                  my:'ကြက်ဥ',                      k1:'eggs',        k2:null, srr1:true},
+    {label:'🍗 Chicken meat (kg)',     my:'ကြက်သား',                   k1:'chicken',     k2:null, srr1:true},
+    {label:'🍗 Gizzards (kg)',         my:'ကြက်အူ',                    k1:'gizzard',     k2:null, srr1:true},
+    {label:'🐟 Fish (kg)',             my:'ငါး',                        k1:'fish',        k2:null, srr1:true},
+    {label:'🥬 Veg bags remaining',    my:'ကျန်',                       k1:'veg_remain',  k2:'veg_remain', stock:true},
+    {label:'🥕 Carrot boxes remaining',my:'ကျန်',                       k1:'carrot_remain',k2:'carrot_remain',stock:true},
+  ];
+
+  var tbody=document.getElementById('totals-tbody');
+  if(!tbody) return;
+  var html='';
+  rows.forEach(function(row){
+    var v1=row.k1?s1[row.k1]:null;
+    var v2=row.k2?s2[row.k2]:null;
+    if(row.srr1) v2=null;
+    var total=(v1||0)+(v2||0);
+    var trStyle=row.stock?'style="opacity:.65;background:#fafafa"':'';
+    html+='<tr '+trStyle+' style="border-bottom:1px solid var(--border)">'
+      +'<td style="padding:9px 14px"><div style="font-weight:600">'+(row.stock?'📦 ':'')+row.label+'</div>'
+      +'<div style="font-size:10px;color:var(--muted);margin-top:1px">'+row.my+(row.stock?' — stock check':row.srr1?' — SRR1 only':'')+'</div></td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--green-dk)'+(v1&&v1>0?'':';color:var(--border)')+'">'+(v1!==null?v1:'—')+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:700;color:var(--fb-blue)'+(v2&&v2>0?'':';color:var(--border)')+'">'+(v2!==null?v2:'—')+'</td>'
+      +'<td style="padding:9px 14px;text-align:center;font-weight:800;font-size:14px;color:#92400e">'+total+'</td>'
+      +'</tr>';
+  });
+  tbody.innerHTML=html;
+}
+
+// ── TABS ────────────────────────────────────────────────────────
+function showTab(t){
+  ['form','combined','history'].forEach(function(pg){
+    document.getElementById('page-'+pg).style.display=pg===t?'block':'none';
+    document.getElementById('tab-'+pg).classList.toggle('active',pg===t);
+  });
+  if(t==='combined') renderCombined();
+  if(t==='history')  renderHistory();
+  if(t==='form') renderTotals();
+}
+
+// ── SUBMIT ──────────────────────────────────────────────────────
+function submitOrder(loc){
+  var emp=(document.getElementById(loc+'-emp').value||'').trim();
+  if(!emp){showToast('Enter your name first · နာမည်ထည့်ပါ','err');return;}
+  var e={loc:loc,date:todayStr(),day:DAY_NAMES[new Date().getDay()],ts:nowStr(),employee:emp};
+  if(loc==='srr2'){
+    e.veg_remain = parseInt(document.getElementById('srr2-veg-remain').value)||0;
+    e.veg_order  = parseInt(document.getElementById('srr2-veg-order').value)||0;
+    e.veg_wash   = e.veg_order; // wash = bags ordered
+    e.carrot_remain=parseInt(document.getElementById('srr2-carrot-remain').value)||0;
+    e.carrot_buy = parseInt(document.getElementById('srr2-carrot-buy').value)||0;
+    e.pumpkin    = parseInt(document.getElementById('srr2-pumpkin').value)||0;
+  } else {
+    e.veg_remain = parseInt(document.getElementById('srr1-veg-remain').value)||0;
+    e.veg_order  = parseInt(document.getElementById('srr1-veg-order').value)||0;
+    e.veg_wash   = e.veg_order; // wash = bags ordered
+    e.carrot_remain=parseInt(document.getElementById('srr1-carrot-remain').value)||0;
+    e.carrot_buy = parseInt(document.getElementById('srr1-carrot-buy').value)||0;
+    e.pumpkin    = parseInt(document.getElementById('srr1-pumpkin').value)||0;
+    e.eggs       = parseInt(document.getElementById('srr1-eggs').value)||0;
+    e.chicken    = parseFloat(document.getElementById('srr1-chicken').value)||0;
+    e.gizzard    = parseFloat(document.getElementById('srr1-gizzard').value)||0;
+    e.fish       = parseFloat(document.getElementById('srr1-fish').value)||0;
+  }
+
+  DATA.submissions=DATA.submissions.filter(function(s){return!(s.date===e.date&&s.loc===loc);});
+  e.photos = photoStore[loc].slice(); // include photos in submission
+  DATA.submissions.push(e);
+  saveLocal();
+  pushToSheet(e);
+  // Clear photos after submit
+  photoStore[loc] = [];
+  renderPhotoGrid(loc);
+  document.getElementById(loc+'-photo-count').textContent = '';
+  updateBadge(loc);
+  renderTotals();
+  showToast('✅ '+loc.toUpperCase()+' submitted! · တင်သွင်းပြီး','ok');
+  localStorage.setItem('srr_me', emp);
+}
+
+function updateBadge(loc){
+  var el=document.getElementById(loc+'-badge');
+  if(!el) return;
+  var s=DATA.submissions.find(function(x){return x.date===todayStr()&&x.loc===loc;});
+  if(s){ el.className='fc-badge done'; el.textContent='✅ '+s.ts.slice(11,16); }
+  else  { el.className='fc-badge pending'; el.textContent='⬜ Pending'; }
+}
+
+// ── COMBINED ────────────────────────────────────────────────────
+var COMB_ITEMS=[
+  {key:'veg_order',  label:'Veg bags to order',   my:'ဟင်းသီးဟင်းရွက် မှာရန်',   unit:'bags'},
+  {key:'veg_wash',   label:'Veg bags to wash',     my:'ဟင်းသီးဟင်းရွက် လျှော်ရန်',unit:'bags'},
+  {key:'veg_remain', label:'Veg bags remaining',   my:'ဟင်းသီးဟင်းရွက် ကျန်',     unit:'bags', stock:true},
+  {key:'carrot_buy', label:'Carrot boxes to buy',  my:'မုန်လာဥနီသေတ္တာ ဝယ်ရန်',   unit:'boxes'},
+  {key:'carrot_remain',label:'Carrot boxes remaining',my:'မုန်လာဥနီ ကျန်',        unit:'boxes',stock:true},
+  {key:'pumpkin',    label:'Pumpkins',             my:'ရွှေဖရုံသီး',               unit:'pcs'},
+  {key:'eggs',       label:'Eggs',                 my:'ကြက်ဥ',                      unit:'pcs',  srr1:true},
+  {key:'chicken',    label:'Chicken meat',         my:'ကြက်သား',                   unit:'kg',   srr1:true},
+  {key:'gizzard',    label:'Chicken gizzards',     my:'ကြက်အူ',                    unit:'kg',   srr1:true},
+  {key:'fish',       label:'Fish',                 my:'ငါး',                        unit:'kg',   srr1:true},
+];
+
+function renderCombined(){
+  var today=todayStr();
+  var s1=DATA.submissions.find(function(s){return s.date===today&&s.loc==='srr1';});
+  var s2=DATA.submissions.find(function(s){return s.date===today&&s.loc==='srr2';});
+  var lbl=document.getElementById('combined-date');
+  if(lbl) lbl.textContent=today+' · '+(s2?'SRR2 ✅':'SRR2 ❌')+' '+(s1?'SRR1 ✅':'SRR1 ❌');
+  var html='';
+  COMB_ITEMS.forEach(function(item){
+    var v2=s2&&!item.srr1?(s2[item.key]||0):null;
+    var v1=s1?(s1[item.key]||0):null;
+    var total=(v2||0)+(v1||0);
+    var rowStyle=item.stock?'style="opacity:.7"':'';
+    html+='<tr '+rowStyle+'>'
+      +'<td><div class="item-lbl">'+(item.stock?'📦 ':item.srr1?'🏠 ':'')+''+item.label+'</div><div class="item-my">'+item.my+' ('+item.unit+')</div></td>'
+      +'<td class="'+(v2!==null&&v2>0?'v-srr2':'v-na')+'">'+(v2!==null?v2:'—')+'</td>'
+      +'<td class="'+(v1!==null&&v1>0?'v-srr1':'v-na')+'">'+(v1!==null?v1:'—')+'</td>'
+      +'<td class="'+(total>0?'v-total':'v-na')+'">'+total+'</td>'
+      +'</tr>';
+  });
+  if(!html) html='<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:20px">No orders today yet</td></tr>';
+  document.getElementById('combined-tbody').innerHTML=html;
+}
+
+// ── HISTORY ─────────────────────────────────────────────────────
+function renderHistory(){
+  if(!DATA.submissions.length){
+    document.getElementById('history-list').innerHTML='<div style="text-align:center;color:var(--muted);padding:32px"><div style="font-size:28px;margin-bottom:8px">📋</div>No history yet</div>';
+    return;
+  }
+  // Group by date descending
+  var byDate={};
+  DATA.submissions.forEach(function(s){
+    var d=s.date||todayStr();
+    if(!byDate[d]) byDate[d]=[];
+    byDate[d].push(s);
+  });
+  var dates=Object.keys(byDate).sort(function(a,b){return b.localeCompare(a);});
+  var ITEM_LABELS={veg_order:'🥬 Veg bags (order)',veg_remain:'🥬 Veg bags (stock)',veg_wash:'🚿 Veg bags (wash)',
+    carrot_buy:'🥕 Carrot boxes (buy)',carrot_remain:'🥕 Carrot boxes (stock)',pumpkin:'🎃 Pumpkins',
+    eggs:'🥚 Eggs',chicken:'🍗 Chicken (kg)',gizzard:'🍗 Gizzards (kg)',fish:'🐟 Fish (kg)'};
+  var html='';
+  dates.forEach(function(date){
+    var entries=byDate[date];
+    var s1=entries.find(function(e){return e.loc==='srr1';});
+    var s2=entries.find(function(e){return e.loc==='srr2';});
+    var d=new Date(date);
+    var dayName=['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
+    var fmtDate=d.getDate()+'/'+(d.getMonth()+1)+'/'+d.getFullYear();
+    html+='<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px;overflow:hidden;box-shadow:0 1px 3px rgba(0,0,0,.06)">';
+    // Day header
+    html+='<div style="background:var(--fb-blue-lt);border-bottom:1px solid var(--border);padding:9px 14px;display:flex;align-items:center;gap:8px;flex-wrap:wrap">'
+      +'<span style="font-size:13px;font-weight:700;color:var(--fb-blue)">📅 '+dayName+' '+fmtDate+'</span>'
+      +(s1?'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--green-lt);color:var(--green-dk);border:1px solid var(--green)">✅ SRR1: '+s1.employee+'</span>':'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--red-lt);color:#7f1d1d;border:1px solid var(--red)">❌ SRR1 missing</span>')
+      +(s2?'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--fb-blue-lt);color:var(--fb-blue);border:1px solid var(--fb-blue)">✅ SRR2: '+s2.employee+'</span>':'<span style="font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:var(--red-lt);color:#7f1d1d;border:1px solid var(--red)">❌ SRR2 missing</span>')
+      +'</div>';
+    // Items table
+    html+='<div style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:12px">'
+      +'<thead><tr style="background:#f8f9fa">'
+      +'<th style="padding:6px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);letter-spacing:.04em;border-bottom:1px solid var(--border)">ITEM</th>'
+      +'<th style="padding:6px 12px;text-align:center;font-size:10px;font-weight:700;color:var(--green-dk);border-bottom:1px solid var(--border)">SRR1</th>'
+      +'<th style="padding:6px 12px;text-align:center;font-size:10px;font-weight:700;color:var(--fb-blue);border-bottom:1px solid var(--border)">SRR2</th>'
+      +'<th style="padding:6px 12px;text-align:center;font-size:10px;font-weight:700;color:#92400e;border-bottom:1px solid var(--border)">TOTAL</th>'
+      +'</tr></thead><tbody>';
+
+    var ORDER_KEYS=['veg_order','veg_wash','carrot_buy','pumpkin','eggs','chicken','gizzard','fish'];
+    ORDER_KEYS.forEach(function(k){
+      var v1=s1?(s1[k]||0):null;
+      var v2=s2?(s2[k]||0):null;
+      var total=(v1||0)+(v2||0);
+      if(!total&&v1===null&&v2===null) return;
+      html+='<tr style="border-bottom:1px solid var(--border)">'
+        +'<td style="padding:7px 12px;font-weight:500">'+(ITEM_LABELS[k]||k)+'</td>'
+        +'<td style="padding:7px 12px;text-align:center;font-weight:700;color:var(--green-dk)">'+(v1!==null?v1:'—')+'</td>'
+        +'<td style="padding:7px 12px;text-align:center;font-weight:700;color:var(--fb-blue)">'+(v2!==null?v2:'—')+'</td>'
+        +'<td style="padding:7px 12px;text-align:center;font-weight:800;color:#92400e;font-size:13px">'+total+'</td>'
+        +'</tr>';
+    });
+
+    // Stock checks
+    var STOCK_KEYS=['veg_remain','carrot_remain'];
+    STOCK_KEYS.forEach(function(k){
+      var v1=s1?(s1[k]||0):null;
+      var v2=s2?(s2[k]||0):null;
+      if(v1===null&&v2===null) return;
+      html+='<tr style="border-bottom:1px solid var(--border);opacity:.7">'
+        +'<td style="padding:7px 12px;font-weight:500;font-style:italic;color:var(--muted)">'+(ITEM_LABELS[k]||k)+' (stock)</td>'
+        +'<td style="padding:7px 12px;text-align:center;color:var(--muted)">'+(v1!==null?v1:'—')+'</td>'
+        +'<td style="padding:7px 12px;text-align:center;color:var(--muted)">'+(v2!==null?v2:'—')+'</td>'
+        +'<td style="padding:7px 12px;text-align:center;color:var(--muted)">'+(v1||0)+(v2||0)+'</td>'
+        +'</tr>';
+    });
+
+    html+='</tbody></table></div>';
+
+    // Photos
+    entries.forEach(function(s){
+      if(s.photos&&s.photos.length){
+        html+='<div style="padding:8px 12px;border-top:1px solid var(--border);display:flex;gap:5px;flex-wrap:wrap;align-items:center">'
+          +'<span style="font-size:11px;color:var(--muted);font-weight:600">📷 '+(s.loc.toUpperCase())+' ('+s.photos.length+' photos):</span>'
+          +s.photos.map(function(src){ return '<img src="'+src+'" style="width:48px;height:48px;object-fit:cover;border-radius:5px;border:1px solid var(--border);cursor:pointer" onclick="viewPhoto(this.src)">';}).join('')
+          +'</div>';
+      }
+    });
+    html+='</div>';
+  });
+  document.getElementById('history-list').innerHTML=html;
+}
+
+// ── SHEET SYNC — LIVE ──────────────────────────────────────────
+var POLL_MS    = 20000;
+var pollTimer  = null;
+var lastMod    = '';
+
+function setPill(l,bg,col){
+  var el=document.getElementById('sync-pill');if(!el)return;
+  el.textContent=l;el.style.background=bg;el.style.color=col;
+  el.style.border='1px solid '+col+'55';
+}
+function pillOk()    {setPill('⬤ Live','rgba(66,183,42,.25)','#fff');}
+function pillSaving(){setPill('⬤ Saving…','rgba(247,185,40,.25)','#fff');}
+function pillOff()   {setPill('⬤ Offline','rgba(255,255,255,.1)','rgba(255,255,255,.5)');}
+function pillLoad()  {setPill('⬤ Loading…','rgba(255,255,255,.15)','rgba(255,255,255,.8)');}
+
+// Load today's submissions from Sheet on open
+function loadFromSheet(){
+  if(!SHEET_URL){pillOff();return;}
+  pillLoad();
+  fetch(SHEET_URL+'?action=get_today&t='+Date.now())
+    .then(function(r){return r.json();})
+    .then(function(d){
+      if(d.status==='ok'){
+        // Merge remote submissions into local — remote wins for same date+loc
+        if(d.submissions && d.submissions.length){
+          d.submissions.forEach(function(remote){
+            var exists=DATA.submissions.find(function(s){return s.date===remote.date&&s.loc===remote.loc;});
+            if(!exists) DATA.submissions.push(remote);
+          });
+          saveLocal();
+        }
+        lastMod = d.lastModified||'';
+        updateBadge('srr1'); updateBadge('srr2'); renderTotals();
+        pillOk();
+      } else { pillOk(); }
+    })
+    .catch(function(){ pillOff(); });
+}
+
+// Poll every 20s — show when colleague submits
+function startPolling(){
+  if(pollTimer) clearInterval(pollTimer);
+  pollTimer=setInterval(function(){
+    if(!SHEET_URL) return;
+    fetch(SHEET_URL+'?action=get_today&t='+Date.now())
+      .then(function(r){return r.json();})
+      .then(function(d){
+        if(d.status==='ok'&&d.lastModified&&d.lastModified!==lastMod){
+          lastMod=d.lastModified;
+          if(d.submissions){
+            var changed=false;
+            d.submissions.forEach(function(remote){
+              var exists=DATA.submissions.find(function(s){return s.date===remote.date&&s.loc===remote.loc;});
+              if(!exists){DATA.submissions.push(remote);changed=true;}
+            });
+            if(changed){
+              saveLocal();updateBadge('srr1');updateBadge('srr2');
+              showToast('🔄 New order submitted by colleague · ဒေတာအသစ်ရောက်ပြီ','info');
+              if(document.getElementById('page-combined').style.display!=='none') renderCombined();
+            }
+          }
+          pillOk();
+        } else { pillOk(); }
+      })
+      .catch(function(){ pillOff(); });
+  }, POLL_MS);
+}
+
+function pushToSheet(entry){
+  if(!SHEET_URL){pillOff();return;}
+  pillSaving();
+  // Send via POST so all fields transfer reliably
+  var slim=Object.assign({},entry,{photos:entry.photos?(entry.photos.length+' photos'):0});
+  fetch(SHEET_URL,{method:'POST',body:JSON.stringify({action:'save',entry:slim})})
+    .then(function(r){return r.json();})
+    .then(function(d){
+      lastMod=d.lastModified||lastMod; pillOk();
+      // Send photos separately
+      if(entry.photos&&entry.photos.length){
+        fetch(SHEET_URL,{method:'POST',body:JSON.stringify({
+          action:'save_photos',loc:entry.loc,date:entry.date,photos:entry.photos
+        })}).catch(function(){});
+      }
+    })
+    .catch(function(){ pillOff(); showToast('⚠️ Saved locally — check connection','err'); });
+}
+
+function syncNow(){
+  if(!SHEET_URL){showToast('No Sheet URL set','err');return;}
+  pillSaving();
+  var slim=DATA.submissions.map(function(e){return Object.assign({},e,{photos:e.photos?(e.photos.length+' photos'):0});});
+  fetch(SHEET_URL,{method:'POST',body:JSON.stringify({action:'sync_all',submissions:slim})})
+    .then(function(r){return r.json();})
+    .then(function(){pillOk();showToast('✅ All synced to Sheet!','ok');})
+    .catch(function(){pillOff();showToast('Sync failed','err');});
+}
+
+// ── TOAST ────────────────────────────────────────────────────────
+function showToast(m,type){var t=document.getElementById('toast');t.textContent=m;t.className='toast '+(type||'info')+' show';setTimeout(function(){t.classList.remove('show');},2600);}
+
+function viewPhoto(src){
+  var ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.92);z-index:9999;display:flex;align-items:center;justify-content:center;cursor:zoom-out';
+  ov.innerHTML='<img src="'+src+'" style="max-width:95vw;max-height:90vh;border-radius:8px;box-shadow:0 8px 40px rgba(0,0,0,.6)">'
+    +'<button style="position:absolute;top:16px;right:20px;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:50%;width:36px;height:36px;color:#fff;font-size:18px;cursor:pointer;display:flex;align-items:center;justify-content:center" onclick="this.parentNode.remove()">✕</button>';
+  ov.onclick=function(e){if(e.target===ov)ov.remove();};
+  document.body.appendChild(ov);
+}
+
+
+var photoStore = {srr1:[], srr2:[]}; // array of base64 strings
+
+function handlePhotos(loc, input){
+  var files = Array.from(input.files);
+  if(!files.length) return;
+  var maxPhotos = 10;
+  if(photoStore[loc].length + files.length > maxPhotos){
+    showToast('Max '+maxPhotos+' photos per submission','err');
+    files = files.slice(0, maxPhotos - photoStore[loc].length);
+  }
+  var loaded = 0;
+  files.forEach(function(file){
+    var reader = new FileReader();
+    reader.onload = function(e){
+      // Compress to max 800px wide
+      var img = new Image();
+      img.onload = function(){
+        var canvas = document.createElement('canvas');
+        var max = 800;
+        var ratio = Math.min(max/img.width, max/img.height, 1);
+        canvas.width  = Math.round(img.width  * ratio);
+        canvas.height = Math.round(img.height * ratio);
+        canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+        var data = canvas.toDataURL('image/jpeg', 0.75);
+        photoStore[loc].push(data);
+        loaded++;
+        if(loaded === files.length) renderPhotoGrid(loc);
+      };
+      img.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+  // Reset file input so same photo can be re-added
+  input.value = '';
+}
+
+function renderPhotoGrid(loc){
+  var grid = document.getElementById(loc+'-photo-grid');
+  if(!grid) return;
+  var photos = photoStore[loc];
+  var html = '';
+  photos.forEach(function(src, i){
+    html += '<div class="photo-thumb">'
+      + '<img src="'+src+'" alt="photo '+(i+1)+'">'
+      + '<button type="button" class="photo-del" onclick="removePhoto(\''+loc+'\','+i+')" title="Remove">✕</button>'
+      + '</div>';
+  });
+  grid.innerHTML = html;
+  // Show count below grid
+  var countEl = grid.nextElementSibling;
+  if(countEl && countEl.classList.contains('photo-count')){
+    countEl.textContent = photos.length > 0 ? photos.length+' photo'+(photos.length>1?'s':'')+' added' : '';
+  }
+}
+
+function removePhoto(loc, idx){
+  photoStore[loc].splice(idx, 1);
+  renderPhotoGrid(loc);
+}
+
+
+document.addEventListener('DOMContentLoaded',function(){
+  var saved=localStorage.getItem('srr_me')||'';
+  if(saved){['srr1-emp','srr2-emp'].forEach(function(id){var el=document.getElementById(id);if(el)el.value=saved;});}
+  updateBadge('srr1'); updateBadge('srr2'); renderTotals();
+  if(SHEET_URL){ loadFromSheet(); startPolling(); } else { pillOff(); }
+});
+</script>
+</body>
+</html>
